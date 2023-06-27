@@ -1,0 +1,786 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Cha111Ng1">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="APP克星系列安卓平台安卓「服务端-手机」frida使用环境配置（一）简单的hook实践下载 12# 选择合适的版本下载https:&#x2F;&#x2F;github.com&#x2F;frida&#x2F;frida&#x2F;releases   如何知道合适的版本 12# 查看安卓机芯片架构adb shell getprop ro.product.cpu.abi  安装： 12# 把frida-server 放到 安卓的&#x2F;data&#x2F;loc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="APP杀手-frida">
+<meta property="og:url" content="https://cha111ng1.github.io/2022/04/13/APP%E6%9D%80%E6%89%8B-frida/index.html">
+<meta property="og:site_name" content="Cha111Ng1&#39;s Blog">
+<meta property="og:description" content="APP克星系列安卓平台安卓「服务端-手机」frida使用环境配置（一）简单的hook实践下载 12# 选择合适的版本下载https:&#x2F;&#x2F;github.com&#x2F;frida&#x2F;frida&#x2F;releases   如何知道合适的版本 12# 查看安卓机芯片架构adb shell getprop ro.product.cpu.abi  安装： 12# 把frida-server 放到 安卓的&#x2F;data&#x2F;loc">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-13T14:02:44.000Z">
+<meta property="article:modified_time" content="2023-04-13T15:49:15.837Z">
+<meta property="article:author" content="Cha111Ng1">
+<meta property="article:tag" content="APP逆向">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>APP杀手-frida - Cha111Ng1&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"cha111ng1.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Cha111Ng1的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/Challenge.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="APP杀手-frida"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-04-13 22:02" pubdate>
+          2022年4月13日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          29 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">APP杀手-frida</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="APP克星系列"><a href="#APP克星系列" class="headerlink" title="APP克星系列"></a>APP克星系列</h1><h2 id="安卓平台"><a href="#安卓平台" class="headerlink" title="安卓平台"></a>安卓平台</h2><h3 id="安卓「服务端-手机」frida使用环境配置（一）"><a href="#安卓「服务端-手机」frida使用环境配置（一）" class="headerlink" title="安卓「服务端-手机」frida使用环境配置（一）"></a>安卓「服务端-手机」frida使用环境配置（一）</h3><h4 id="简单的hook实践"><a href="#简单的hook实践" class="headerlink" title="简单的hook实践"></a>简单的hook实践</h4><p>下载</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">选择合适的版本下载</span><br>https://github.com/frida/frida/releases<br></code></pre></td></tr></table></figure>
+
+<p> 如何知道合适的版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">查看安卓机芯片架构</span><br>adb shell getprop ro.product.cpu.abi<br></code></pre></td></tr></table></figure>
+
+<p>安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">把frida-server 放到 安卓的/data/local/tmp/目录</span><br>adb push frida-server /data/local/tmp/<br></code></pre></td></tr></table></figure>
+
+<p>安卓端启动frida服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">进入超级权限</span><br>su<br><span class="hljs-meta prompt_"># </span><span class="language-bash">给予可执行权限</span><br>chmod +x /data/local/tmp/frida-server<br><span class="hljs-meta prompt_"># </span><span class="language-bash">启动frida服务端</span><br>/data/local/tmp/frida-server<br></code></pre></td></tr></table></figure>
+
+<p>实验demo</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs js"># hello-frida.<span class="hljs-property">js</span><br><br><span class="hljs-built_in">setTimeout</span>(<br>	<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)&#123;<br>		<span class="hljs-title class_">Java</span>.<span class="hljs-title function_">perform</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)&#123;<br>			<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;hello frida!&quot;</span>)<br>		&#125;)<br>	&#125;<br>)<br></code></pre></td></tr></table></figure>
+
+<p>测试demo，使用命令执行进行hook操作</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs awk">➜  z frida -U -l hello-frida.js 师傅端<br>     ____<br>    / _  |   Frida <span class="hljs-number">15.1</span>.<span class="hljs-number">28</span> - A world-class dynamic instrumentation toolkit<br>   | (_| |<br>    &gt; _  |   Commands:<br>   <span class="hljs-regexp">/_/</span> |_|       help      -&gt; Displays the help system<br>   . . . .       object?   -&gt; Display information about <span class="hljs-string">&#x27;object&#x27;</span><br>   . . . .       <span class="hljs-keyword">exit</span>/quit -&gt; Exit<br>   . . . .<br>   . . . .   More info at https:<span class="hljs-regexp">//</span>frida.re<span class="hljs-regexp">/docs/</span>home/<br>   . . . .<br>   . . . .   Connected to Android Emulator <span class="hljs-number">5554</span> (id=emulator-<span class="hljs-number">5554</span>)<br>Attaching...                                                            <br>hello frida!<br>[Android Emulator <span class="hljs-number">5554</span>::师傅端 ]-&gt;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="IOS平台"><a href="#IOS平台" class="headerlink" title="IOS平台"></a>IOS平台</h2><h2 id="工具拓展"><a href="#工具拓展" class="headerlink" title="工具拓展"></a>工具拓展</h2><blockquote>
+<p>Frida下载地址：<a target="_blank" rel="noopener" href="https://github.com/frida/frida/releases">https://github.com/frida/frida/releases</a></p>
+<p>frida-ios-dump：<a target="_blank" rel="noopener" href="https://github.com/AloneMonkey/frida-ios-dump">https://github.com/AloneMonkey/frida-ios-dump</a></p>
+</blockquote>
+<h2 id="adb常用命令拓展"><a href="#adb常用命令拓展" class="headerlink" title="adb常用命令拓展"></a>adb常用命令拓展</h2><p>* 查看设备</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">adb devices</span><br></code></pre></td></tr></table></figure>
+
+<p>ps这个命令是查看当前连接的设备, 连接到计算机的android设备或者模拟器将会列出显示</p>
+<p>若有多台安卓设备，可以通过在adb后面加上 -s &lt;设备id&gt; 对指定设备进行装包、卸载等操作</p>
+<p>*启动adb</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">adb <span class="hljs-keyword">start</span>-<span class="hljs-keyword">server</span><br></code></pre></td></tr></table></figure>
+
+<p>*关闭adb</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs axapta">adb kill-<span class="hljs-keyword">server</span><br></code></pre></td></tr></table></figure>
+
+<p>* 安装软件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml">adb install <span class="hljs-tag">&lt;<span class="hljs-name">apk文件路径</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>* 卸载软件 </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml">adb uninstall <span class="hljs-tag">&lt;<span class="hljs-name">应用进程名</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>*卸载app但保留数据和缓存文件</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">adb uninstall -k&lt;<span class="hljs-keyword">package</span>&gt;<br></code></pre></td></tr></table></figure>
+
+<p>*重新启动设别</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">adb reboot</span><br></code></pre></td></tr></table></figure>
+
+<p>*重启到bootloader，即刷机模式</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">adb reboot bootloader</span><br></code></pre></td></tr></table></figure>
+
+<p>*重启到recovery，即恢复模式</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">adb reboot recovery</span><br></code></pre></td></tr></table></figure>
+
+<p>*从电脑上发送文件到设备</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs avrasm">adb <span class="hljs-keyword">push</span> &lt;本地路径&gt; &lt;远程路径&gt;<br><span class="hljs-symbol">ps:</span> 用<span class="hljs-keyword">push</span>命令可以把本机电脑上的文件或者文件夹复制到设备(手机)<br></code></pre></td></tr></table></figure>
+
+<p>*从设备上下载文件到电脑</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs xml">adb pull <span class="hljs-tag">&lt;<span class="hljs-name">远程路径</span>&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">本地路径</span>&gt;</span><br>ps: 用pull命令可以把设备(手机)上的文件或者文件夹复制到本机电脑<br></code></pre></td></tr></table></figure>
+
+<p>*取得设备root权限</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">adb remount</span><br></code></pre></td></tr></table></figure>
+
+<p>*登录设备shell</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs vim">adb <span class="hljs-keyword">shell</span><br>adb <span class="hljs-keyword">shell</span> &lt;<span class="hljs-keyword">command</span>命令&gt;<br><span class="hljs-keyword">ps</span>: adb <span class="hljs-keyword">shell</span> 后面加的是linux系统操作指令，也即直接运行设备命令, 相当于执行远程命令<br></code></pre></td></tr></table></figure>
+
+<p>*使用adb命令对手机进行截屏并拷贝到电脑</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">adb shell <span class="hljs-regexp">/system/</span>bin<span class="hljs-regexp">/screencap -p /</span>sdcard/screenshot.png（保存到手机）<br>adb pull <span class="hljs-regexp">/sdcard/</span>screenshot.png d:/screenshot.png（拷贝到电脑）<br></code></pre></td></tr></table></figure>
+
+<p>*输出当前servers信息</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> dumpsys </span><br></code></pre></td></tr></table></figure>
+
+<p>ps: 输出信息的开始部分就是所有运行的service</p>
+<p>-查询到运行的system service后，就可以在dumpsys后面加上service的名字，查看指定的service信息。</p>
+<figure class="highlight isbl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs isbl"><span class="hljs-variable">adb</span> <span class="hljs-variable">shell</span> <span class="hljs-variable">dumpsys</span> <span class="hljs-variable">activity</span><br><span class="hljs-variable">adb</span> <span class="hljs-variable">shell</span> <span class="hljs-variable">dumpsys</span> <span class="hljs-function"><span class="hljs-title">cpuinfo</span>(<span class="hljs-variable">CPU</span>)</span><br><span class="hljs-variable">adb</span> <span class="hljs-variable">shell</span> <span class="hljs-variable">dumpsys</span> <span class="hljs-function"><span class="hljs-title">batterystate</span>(电池)</span><br><span class="hljs-variable">adb</span> <span class="hljs-variable">shell</span> <span class="hljs-variable">dumpsys</span> <span class="hljs-function"><span class="hljs-title">window</span>(分辨率)</span><br></code></pre></td></tr></table></figure>
+
+<p>*检测手机运行时间</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">uptime</span></span><br></code></pre></td></tr></table></figure>
+
+<p>*查看logcat日志</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">adb logcat -v time-s <span class="hljs-keyword">tag</span> <span class="hljs-title">&gt; xxx</span>.log<br></code></pre></td></tr></table></figure>
+
+<p>ps: 其中-v time使输出的日志带时间信息，-s用于通过tag过滤日志（也可以通过管道grep过滤），&gt; 使保存到本地文件。若直接在终端查看日志，则不加。</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs vim">adb logcat | <span class="hljs-keyword">grep</span> &lt;正则表达式&gt;<br><span class="hljs-keyword">ps</span>: <span class="hljs-keyword">grep</span>后为正则表达式<br>adb logcat | <span class="hljs-keyword">grep</span> &lt;正则表达式&gt; | tee xxx.<span class="hljs-built_in">log</span><br><span class="hljs-keyword">ps</span>:使用 tee可以实现同时在终端输出且保存到文件<br></code></pre></td></tr></table></figure>
+
+<p>*强制杀死进程</p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gauss">adb <span class="hljs-built_in">shell</span> amforce-<span class="hljs-keyword">stop</span> &lt;进程名&gt;<br></code></pre></td></tr></table></figure>
+
+<p>*启动指定Activity</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">adb <span class="hljs-keyword">shell</span> <span class="hljs-keyword">am</span> start-n &lt;进程名&gt; /<span class="hljs-symbol">&lt;Acitvity&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>*开关wifi</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> svc wifienable <span class="hljs-comment">#打开wifi</span></span><br>adb <span class="hljs-keyword">shell</span><span class="language-bash"> svc wifidisable <span class="hljs-comment">#关闭wifi</span></span><br></code></pre></td></tr></table></figure>
+
+<p>*查看wifi密码</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">adb shell cat<span class="hljs-regexp">/data/mi</span>sc<span class="hljs-regexp">/wifi/</span>*.conf<br></code></pre></td></tr></table></figure>
+
+<p>*获取序列号</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">adb <span class="hljs-keyword">get</span>-serialno<br></code></pre></td></tr></table></figure>
+
+<p>*查看设备cpu和内存占用情况</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs coq">adb shell <span class="hljs-built_in">top</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看占用内存前6的app</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">adb</span> shell top -m <span class="hljs-number">6</span><br></code></pre></td></tr></table></figure>
+
+<p>*刷新一次内存信息，然后返回</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">adb</span> shell top -n <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>*查询各进程内存使用情况</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> procrank</span><br></code></pre></td></tr></table></figure>
+
+<p>*杀死一个进程</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">kill</span>[pid]</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看进程列表</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">adb <span class="hljs-keyword">shell</span> <span class="hljs-keyword">ps</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看指定进程状态</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">adb <span class="hljs-keyword">shell</span> <span class="hljs-keyword">ps</span> -<span class="hljs-keyword">x</span>[PID]<br></code></pre></td></tr></table></figure>
+
+<p>*查看后台services信息</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> servicelist</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看当前内存占用</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">cat</span>/proc/meminfo</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看IO内存分区</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">cat</span>/proc/iomem</span><br></code></pre></td></tr></table></figure>
+
+<p>*重命名文件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml">adb shell rename <span class="hljs-tag">&lt;<span class="hljs-name">原文件名</span>&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">修改后文件名</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>*删除system/avi.apk</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">rm</span>/system/avi.apk</span><br></code></pre></td></tr></table></figure>
+
+<p>*删除文件夹及其下面所有文件</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">rm</span> -r&lt;文件夹&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>*移动文件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml">adb shell mv <span class="hljs-tag">&lt;<span class="hljs-name">原文件路径</span>&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">移动后文件路径</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>*设置文件权限</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">chmod</span> 777&lt;文件&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>*新建文件夹</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> mkdirpath/foldelname</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看文件内容</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stata">adb <span class="hljs-keyword">shell</span> <span class="hljs-keyword">cat</span>&lt;<span class="hljs-keyword">file</span>&gt;<br></code></pre></td></tr></table></figure>
+
+<p>*清除log缓存</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">adb logcat -c</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看bug报告</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs elm"><span class="hljs-title">adb</span> bugre<span class="hljs-keyword">port</span> <br></code></pre></td></tr></table></figure>
+
+<p>*获取设备名称</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">adb <span class="hljs-keyword">shell</span><span class="language-bash"> <span class="hljs-built_in">cat</span>/system/build.prop</span><br></code></pre></td></tr></table></figure>
+
+<p>*查看ADB帮助</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">adb <span class="hljs-built_in">help</span><br></code></pre></td></tr></table></figure>
+
+<p>*跑monkey</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml">adb shell monkey -v-p <span class="hljs-tag">&lt;<span class="hljs-name">进程名</span>&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">次数</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>*当adb 显示端口被占用，拒绝访问时的处理办法：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs perl">adb nodaemon server//查看哪个端口被占用<br>netstat -ano |findstr <span class="hljs-string">&quot;&lt;端口号&gt;&quot;</span> //提示占用该端口的进程（非<span class="hljs-number">0</span>地址）<br>（下面步骤可省略，可通过任务管理器杀死）<br>tasklist /fi “PIDe<span class="hljs-string">q &lt;进程号&gt;</span>”//通过pid查看所有进程<br>taskkill /pid &lt;进程号&gt; <span class="hljs-regexp">/f/</span>/杀死进程<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/APP%E9%80%86%E5%90%91/">#APP逆向</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>APP杀手-frida</div>
+      <div>https://cha111ng1.github.io/2022/04/13/APP杀手-frida/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Cha111Ng1</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年4月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/04/11/I-am-Cha111Ng1/" title="I am Cha111Ng1">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">I am Cha111Ng1</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
